@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
+  <?if $(var.Platform) = x64 ?>
+  <?define Win64 = "yes" ?>
+  <?define PlatformProgramFilesFolder = "ProgramFiles64Folder" ?>
+  <?else ?>
+  <?define Win64 = "no" ?>
+  <?define PlatformProgramFilesFolder = "ProgramFilesFolder" ?>
+  <?endif ?>
+  <?define YOUR_PROJECT_TargetDir=$(var.YOUR_PROJECT.TargetDir)?>
+  <Product Id="*" Name="YOUR_PRODUCT_NAME" Language="1033" Version="YOUR_VERSION_NUMBER" Manufacturer="YOUR_MANUFACTURER_NAME" UpgradeCode="6DC92DB3-AA62-4C13-95E0-45C06AADDB32">
+    <Package InstallerVersion="500" Compressed="yes" Platform="x64" InstallScope="perMachine"/>
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    <MediaTemplate EmbedCab="yes"/>
+    <Feature Id="ProductFeature" Title="YOUR_FEATURE_TITLE" Level="1">
+      <ComponentGroupRef Id="ProductComponents" />
+      <ComponentRef Id="RegistryEntries"/>      
+    </Feature>
+    <Icon Id="ProductIcon" SourceFile="$(var.ProjectDir)NAME_OF_YOUR_PRODUCT_ICON.ico"/>
+    <Property Id="ARPPRODUCTICON" Value="ProductIcon"/>
+    <WixVariable Id="WixUIBannerBmp" Value="$(var.ProjectDir)NAME_OF_YOUR_BANNER.bmp"/>
+    <WixVariable Id="WixUIDialogBmp" Value="$(var.ProjectDir)NAME_OF_YOUR_BACKGROUND.bmp"/>
+    <UIRef Id="WixUI_Minimal" />
+    <PropertyRef Id="WIX_ACCOUNT_USERS" />
+  </Product>  
+  <Fragment>
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="$(var.PlatformProgramFilesFolder)">
+        <Directory Id="MANUFACTURERFOLDER" Name="!(bind.property.Manufacturer)" >
+          <Directory Id="INSTALLFOLDER" Name="!(bind.property.ProductName)" />
+        </Directory>
+      </Directory>      
+    </Directory>
+  </Fragment>
+  <Fragment>
+    <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER"> 
+	  <Component Id="NAME_OF_YOUR_DLL.dll" Guid="1E9A1682-0F62-4CDF-A0C9-6D86B6950E26">
+        <File Id="NAME_OF_YOUR_DLL.dll" Name="NAME_OF_YOUR_DLL.dll" Source="$(var.YOUR_PROJECT_TargetDir)NAME_OF_YOUR_DLL.dll" />
+      </Component>
+	  <Component Id="NAME_OF_YOUR_MANIFEST.dll.manifest" Guid="736F51B1-5B1F-49DA-976E-33EE4C5C8AC0">
+        <File Id="NAME_OF_YOUR_MANIFEST.dll.manifest" Name="NAME_OF_YOUR_MANIFEST.dll.manifest" Source="$(var.YOUR_PROJECT_TargetDir)NAME_OF_YOUR_MANIFEST.dll.manifest" />
+      </Component>
+      <Component Id="NAME_OF_YOUR_VSTO_FILE.vsto" Guid="12D44F21-62A4-4B8E-B018-3B9B325512C1">
+        <File Id="NAME_OF_YOUR_VSTO_FILE.vsto" Name="NAME_OF_YOUR_VSTO_FILE.vsto" Source="$(var.YOUR_PROJECT_TargetDir)NAME_OF_YOUR_VSTO_FILE.vsto" />
+      </Component>      
+    </ComponentGroup>
+  </Fragment>  
+  <Fragment>
+    <DirectoryRef Id="TARGETDIR">
+      <Component Id="RegistryEntries" Guid="A495FAB3-8440-4357-83F7-D1F4EABAA06A" Win64="$(var.Win64)">
+        <RegistryKey Root="HKLM" Key="Software\Microsoft\Office\PowerPoint\AddIns\!(bind.property.ProductName)">
+          <RegistryValue Id="Description" Type="string" Name="Description" Value="!(bind.property.ProductName)" />
+          <RegistryValue Id="FriendlyName" Type="string" Name="FriendlyName" Value="!(bind.property.ProductName)" />
+          <RegistryValue Id="LoadBehavior" Type="integer" Name="LoadBehavior" Value="3"/>
+          <RegistryValue Id="Manifest" Type="string" Name="Manifest" Value="[#NAME_OF_YOUR_VSTO_FILE.vsto]|vstolocal" KeyPath="yes"/>
+        </RegistryKey>        
+      </Component>
+    </DirectoryRef>
+  </Fragment>
+</Wix>
